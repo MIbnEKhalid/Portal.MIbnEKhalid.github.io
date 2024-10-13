@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="icon" type="image/x-icon" href="../Assets/dgicon.svg">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@10.2.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.3/pako.min.js"></script>
+    <link rel="stylesheet" href="../Assets/main.css" />
+    <link rel="stylesheet" href="../Assets/style.css" />
+</head>
+<header>
+    <nav>
+        <div class="navbar">
+            <div class="logo">
+                <div class="image">
+                    <img src="../Assets/dg.svg" alt="" />
+                </div>
+                <div class="text">
+                    <a href="../">MBK Tech Studio</a>
+                </div>
+            </div>
+            <ul style="display: none;" class="menu">
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#services">Projects</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+                <div class="cancel-btn">
+                    <i class="fas fa-times"></i>
+                </div>
+            </ul>
+            <div class="media-icons">
+                <a href="https://www.facebook.com/people/MBK-Tech-Studio/61559079077988/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://x.com/ibnekhalid28" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="https://instagram.com/mbktech.studios" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://github.com/MIbnEKhalid" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/muhammad-bin-khalid-89711b25b" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https://youtube.com/@mibnekhalid" target="_blank"><i class="fab fa-youtube"></i></a>
+                <a href="https://discord.gg/MUAyAeckrM" target="_blank"><i class="fab fa-discord"></i></a>
+            </div>
+        </div>
+        <div class="menu-btn">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+</header>
+<style>
+    h3 {
+        top: 70%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: fixed;
+        font-family: 'Poppins', sans-serif;
+        color: aqua;
+    }
+    
+    @media (max-width: 700px) {
+        .portalbox {
+            width: 90%;
+        }
+        .user-box label {
+            left: 2%;
+        }
+        h3 {
+            top: 72%;
+        }
+    }
+</style>
+<body>
+    <section class="about" id="about">
+        <div class="content">
+            <div class="portalbox">
+                <div class="title"><span>Login Portal</span></div>
+                <form id="loginForm">
+                <div class="user-box">
+                    <input id="loginUsername" type="text" name="UserName" required="" />
+                    <label>User Name</label>
+                </div>
+                <div class="user-box">
+                    <input id="loginPassword" type="password" name="Password" required="" />
+                    <label>Password</label>
+                    <span class="password-toggle-icon"><i class="fas fa-eye"></i></span>
+                </div>
+                <div class="wrap">
+                    <div class="button">
+                        <button type="submit">Login</button>
+                    </div>
+                </div>
+                <div class="wrap">
+                    <div class="button">
+                        <button type="submit" onclick="showbox('c-form')">Contact Us</button>
+                    </div>
+                </div>
+            </form>
+                <p class="NotRegistered">Not registered? <a class="Link" href="../signup/">Sign Up</a></p>
+                <div class="checkbox-container">
+                    <label class="lns-checkbox">
+                    <input type="checkbox">
+                    <span>Rember Me</span>
+                  </label>
+                </div>
+                <p class="admin"><span class=""><i class="fas fa-info-circle"></i> </span>This Portal Is For Admins Only</p>
+                <script>
+                    // Initialize the Appwrite Client
+                    const client = new Appwrite.Client();
+                    const Database_ID = '66d19331002eba3ae1ff'; // Replace with your actual database ID
+                    const Collection_ID = '66d21488000c4040d8a9'; // Replace with your actual collection ID
+                
+                    client
+                        .setEndpoint('https://cloud.appwrite.io/v1') // Your Appwrite endpoint
+                        .setProject('66d192aa0028b9e5e25d'); // Your Appwrite project ID
+                
+                    const databases = new Appwrite.Databases(client);
+                
+                    // Function to hash the input using SHA-512
+                    async function hashSHA512(message) {
+                        const msgUint8 = new TextEncoder().encode(message); // Encode message as UTF-8
+                        const hashBuffer = await crypto.subtle.digest('SHA-512', msgUint8); // Hash the message
+                        const hashArray = Array.from(new Uint8Array(hashBuffer)); // Convert buffer to byte array
+                        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // Convert bytes to hex string
+                        return hashHex;
+                    }
+                
+                    // Function to handle login
+                    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+                        event.preventDefault(); // Prevent default form submission
+                
+                        // Get form data
+                        const username = document.getElementById('loginUsername').value;
+                        const password = document.getElementById('loginPassword').value;
+                
+                        try {
+                            // Search for the user by username in the collection
+                            const userDocuments = await databases.listDocuments(Database_ID, Collection_ID, [
+                                Appwrite.Query.equal('UserName', username) // Replace 'UserName' with the actual field name in your collection
+                            ]);
+                
+                            if (userDocuments.total > 0) {
+                                // User found, get user data
+                                const user = userDocuments.documents[0];
+                
+                                // Generate a salt using the hashed username
+                                const salt = await hashSHA512(username);
+                
+                                // Concatenate the salt with the input password and hash it
+                                const saltedPassword = salt + password;
+                                const hashedPassword = await hashSHA512(saltedPassword);
+                
+                                // Compare the hashed passwords
+                                if (user.Password === hashedPassword) {
+                                    // Password matches
+                                    showbox('m-form');
+                                    document.getElementById('loginMessage').textContent = 'Login successful!';
+                                    console.log('User logged in successfully:', user);
+                                    // Redirect or perform further actions after login
+                                } else {
+                                    // Password does not match
+                                    showbox('m-form');
+                                    document.getElementById('loginMessage').textContent = 'Invalid username or password.';
+                                    console.error('Invalid password for user:', username);
+                                }
+                            } else {
+                                // User not found
+                                showbox('m-form');
+                                document.getElementById('loginMessage').textContent = 'User not found.';
+                                console.error('User not found:', username);
+                            }
+                        } catch (error) {
+                            // Handle errors
+                            showbox('m-form');
+                            document.getElementById('loginMessage').textContent = 'Error logging in user: ' + error.message;
+                            console.error('Error logging in user:', error);
+                        }
+                    });
+                </script>
+                <script>
+                    const passwordField = document.getElementById("password");
+                    const togglePassword = document.querySelector(".password-toggle-icon i");
+                    togglePassword.addEventListener("click", function() {
+                        if (passwordField.type === "password") {
+                            passwordField.type = "text";
+                            togglePassword.classList.remove("fa-eye");
+                            togglePassword.classList.add("fa-eye-slash");
+                        } else {
+                            passwordField.type = "password";
+                            togglePassword.classList.remove("fa-eye-slash");
+                            togglePassword.classList.add("fa-eye");
+                        }
+                    });
+                </script>            
+            <div id="m-form" class="message-box">
+                <div class="title" style="margin-bottom:20px;"><span>Login Failed</span></div>
+                <h4 style="color: #fff;"id="loginMessage"></h4>
+                <div class="button"style="margin-top:20px;">
+                    <button onclick="hidebox('m-form')">UnderStood</button>
+                </div>
+            </div>
+            </div>
+            <div id="c-form" class="contact-box">
+                <div onclick="hidebox('c-form')" class="close-btn"></div>
+                <div class="title"><span>Contact Form</span></div>
+                <form action="https://api.web3forms.com/submit" method="POST" class="m-4 pl-4" id="form">
+                    <input class="input" type="hidden" name="Timestamp" />
+                    <input class="input" type="hidden" name="Subject" value="LoginSupport" />
+                    <input class="input" type="hidden" name="PageUrl" />
+                    <input type="hidden" name="access_key" value="d2837145-a5b5-49af-b269-cb79e9b57456">
+                    <div class="field">
+                        <label class="label">Name</label>
+                        <div class="control">
+                            <div class="input"><input type="text" placeholder="Enter Your Name" name="UserName" required /></div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Email</label>
+                        <div class="control">
+                            <div class="input"><input type="email" placeholder="Enter Your Email" name="Email" required /></div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Page URL:</label>
+                        <div class="control">
+                            <div class="input"><input type="text" placeholder="Reload the page if the URL is not displayed." id="pageUrlInput" name="PageUrl" readonly /></div>
+                        </div>
+                    </div>
+                    <div class="field" style="margin-bottom: -5px;">
+                        <label class="label">Message</label>
+                        <div class="control"><textarea class="input" placeholder="Enter Your Message..." name="Message" rows="4" required></textarea></div>
+                    </div>
+                    <div class="button field is-grouped" style="display: flex; justify-content: center;">
+                        <div class="control"><button class="button is-primary" type="submit" id="submit-button">Submit</button></div>
+                    </div>
+                    <div id="message" style="display: none; font-weight: bold; color: green; padding: 8px; background-color: beige; border-radius: 4px; margin-top: 10px; border-color: aquamarine;">
+                    </div>
+                </form>
+                <script>
+                    function reloadPage() {
+                        location.reload();
+                    }
+                    function loadPage(url) {
+                        location.href = url;
+                    }
+                    document.addEventListener("DOMContentLoaded", function() {
+                        function getPageUrl() {
+                            return window.location.href;
+                        }
+                        // Set the value of the input field with the page URL
+                        document.getElementById('pageUrlInput').value = getPageUrl();
+                    });
+                </script>
+            </div>
+        </div>
+    </section>
+</body>
+<script>
+    function showbox(id) {
+        document.getElementById(id).classList.add('show');
+    }
+
+    function hidebox(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+</script>
+<footer>
+    <div class="text">
+        <span>Developed By <a href="https://github.com/MIbnEKhalid">Muhammad Bin Khalid</a> | &#169; 2024 All Rights Reserved | <a href="https://privacy.mbktechstudio.com/" target="_blank">Terms & Conditions</a> | <a href="mailto:support@mbktechstudio.com" title="support@mbktechstudio.com">support@mbktechstudio.com</a></span>
+    </div>
+</footer>
+<script src="../Assets/script.js"></script>
+
+</html>
