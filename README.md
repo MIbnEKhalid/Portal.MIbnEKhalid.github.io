@@ -57,6 +57,9 @@ The Main Website (MBKTechStudio.com) Is Hosted On GitHub, While Other Website (S
 ## License
 
 This project is licensed under the WTFPL - see the [LICENSE](LICENSE) file for details.
+
+
+**NOTE:** Only The Source Code Of This Website Is Covered Under The [WTFP LICENSE](https://choosealicense.com/licenses/wtfpl/). The Project Documentation, Some Images, Blog Posts, And Other Content Are NOT Covered Under This License And Remain The Intellectual Property Of The Author.
  
 ## Contact
 
